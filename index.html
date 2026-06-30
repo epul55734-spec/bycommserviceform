@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Borang Permohonan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #111111;
+    --dark: #1c1c1e;
+    --mid: #3a3a3c;
+    --muted: #6e6e73;
+    --border: #d1d1d6;
+    --bg: #f0f0f3;
+    --white: #ffffff;
+    --green: #1e8449;
+    --green-bg: #e8f5e9;
+    --blue: #007aff;
+    --blue-bg: #e8f0fe;
+    --red: #c0392b;
+  }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  .progress-header {
+    background: var(--black);
+    color: white;
+    padding: 1.2rem 1.4rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .progress-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .progress-bar-bg { height: 5px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; transition: width 0.35s ease; width: 9%; }
+  .progress-label { font-size: 11px; color: #999; margin-top: 6px; }
+
+  .step-container { padding: 1.6rem 1.4rem 6rem; min-height: 60vh; }
+  .step { display: none; animation: fadeIn 0.3s ease; }
+  .step.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .step-eyebrow { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); font-weight: 600; margin-bottom: 6px; }
+  .step-title { font-size: 21px; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.3; }
+
+  .field { margin-bottom: 1.3rem; }
+  .field-label { font-size: 13px; font-weight: 500; color: var(--mid); margin-bottom: 7px; display: block; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+  .text-input {
+    width: 100%; padding: 13px 14px; font-size: 15px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--white); color: var(--dark); font-family: inherit;
+  }
+  .text-input:focus { outline: none; border-color: var(--blue); }
+
+  .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    padding: 10px 16px; background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 20px; font-size: 13.5px; color: var(--mid); cursor: pointer;
+    user-select: none; transition: all 0.15s;
+  }
+  .pill.selected { background: var(--blue); border-color: var(--blue); color: white; font-weight: 500; }
+  .pill-group.vertical { flex-direction: column; }
+  .pill-group.vertical .pill { text-align: left; border-radius: 10px; }
+
+  .card-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tap-card {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.15s;
+  }
+  .tap-card.selected { border-color: var(--blue); background: var(--blue-bg); }
+  .tap-card .icon { font-size: 22px; margin-bottom: 4px; }
+  .tap-card .name { font-size: 13px; font-weight: 600; }
+  .tap-card .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .stepper-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 16px;
+  }
+  .stepper-val { font-size: 17px; font-weight: 700; }
+  .stepper-btn {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--bg); border: none;
+    font-size: 18px; color: var(--mid); display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px; background: var(--white); border-top: 1px solid var(--border);
+    padding: 0.9rem 1.4rem; display: flex; gap: 10px; z-index: 20;
+  }
+  .nav-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; }
+  .nav-btn.back { background: var(--bg); color: var(--mid); flex: 0 0 80px; }
+  .nav-btn.next { background: var(--black); color: white; }
+  .nav-btn.submit { background: var(--green); color: white; }
+
+  .summary-card {
+    background: var(--white); border-radius: 12px; padding: 1rem 1.2rem;
+    margin-bottom: 10px; border: 1px solid var(--border);
+  }
+  .summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--bg); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .label { color: var(--muted); }
+  .summary-row .value { font-weight: 500; text-align: right; max-width: 60%; }
+
+  .done-screen { text-align: center; padding: 3rem 1.4rem; }
+  .done-icon { font-size: 56px; margin-bottom: 1rem; }
+  .done-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .done-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="progress-header">
+  <div class="progress-title">Borang Permohonan iPhone</div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+  <div class="progress-label" id="progressLabel">Langkah 1 / 11</div>
+</div>
+
+<div class="step-container">
+
+  <!-- STEP 1: Model & Storage -->
+  <div class="step active" data-step="1">
+    <p class="step-eyebrow">Pilihan Telefon</p>
+    <p class="step-title">Pilih model & warna 📱</p>
+
+    <div class="field">
+      <label class="field-label">Model</label>
+      <div class="card-group" id="modelGroup">
+        <div class="tap-card" data-value="iPhone 17 Pro Max"><div class="icon">📱</div><div class="name">17 Pro Max</div></div>
+        <div class="tap-card" data-value="iPhone 17 Pro"><div class="icon">📱</div><div class="name">17 Pro</div></div>
+        <div class="tap-card" data-value="iPhone 17"><div class="icon">📱</div><div class="name">17</div></div>
+        <div class="tap-card" data-value="iPhone Air"><div class="icon">📱</div><div class="name">Air (17系列)</div></div>
+        <div class="tap-card" data-value="iPhone 16 Pro Max"><div class="icon">📱</div><div class="name">16 Pro Max</div></div>
+        <div class="tap-card" data-value="iPhone 16 Pro"><div class="icon">📱</div><div class="name">16 Pro</div></div>
+        <div class="tap-card" data-value="iPhone 16 Plus"><div class="icon">📱</div><div class="name">16 Plus</div></div>
+        <div class="tap-card" data-value="iPhone 16"><div class="icon">📱</div><div class="name">16</div></div>
+        <div class="tap-card" data-value="iPhone 15 Pro Max"><div class="icon">📱</div><div class="name">15 Pro Max</div></div>
+        <div class="tap-card" data-value="iPhone 15 Pro"><div class="icon">📱</div><div class="name">15 Pro</div></div>
+        <div class="tap-card" data-value="iPhone 15 Plus"><div class="icon">📱</div><div class="name">15 Plus</div></div>
+        <div class="tap-card" data-value="iPhone 15"><div class="icon">📱</div><div class="name">15</div></div>
+        <div class="tap-card" data-value="iPhone 14 Pro Max"><div class="icon">📱</div><div class="name">14 Pro Max</div></div>
+        <div class="tap-card" data-value="iPhone 14 Pro"><div class="icon">📱</div><div class="name">14 Pro</div></div>
+        <div class="tap-card" data-value="iPhone 14"><div class="icon">📱</div><div class="name">14</div></div>
+        <div class="tap-card" data-value="iPhone 13 Pro Max"><div class="icon">📱</div><div class="name">13 Pro Max</div></div>
+        <div class="tap-card" data-value="iPhone 13 Pro"><div class="icon">📱</div><div class="name">13 Pro</div></div>
+        <div class="tap-card" data-value="iPhone 13"><div class="icon">📱</div><div class="name">13</div></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Storage (GB)</label>
+      <div class="pill-group" id="storageGroup">
+        <div class="pill" data-value="128GB">128GB</div>
+        <div class="pill" data-value="256GB">256GB</div>
+        <div class="pill" data-value="512GB">512GB</div>
+        <div class="pill" data-value="1TB">1TB</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Loan duration -->
+  <div class="step" data-step="2">
+    <p class="step-eyebrow">Pelan Ansuran</p>
+    <p class="step-title">Berapa bulan? 📅</p>
+    <div class="field">
+      <label class="field-label">Tempoh Bulanan</label>
+      <div class="pill-group vertical" id="durationGroup">
+        <div class="pill" data-value="12 bulan">12 bulan — bayaran tinggi, cepat siap</div>
+        <div class="pill" data-value="24 bulan">24 bulan — paling popular ⭐</div>
+        <div class="pill" data-value="36 bulan">36 bulan — bayaran rendah, lebih lama</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Call times -->
+  <div class="step" data-step="3">
+    <p class="step-eyebrow">Waktu Dihubungi</p>
+    <p class="step-title">Bila boleh kami call? 📞</p>
+
+    <div class="field">
+      <label class="field-label">🕛 Pukul berapa boleh call Customer (cik sendiri)</label>
+      <input type="text" class="text-input" id="callTimeCustomer" placeholder="Contoh: 1pm - 7pm">
+    </div>
+
+    <div class="field">
+      <label class="field-label">🕛 Pukul berapa boleh call Office (tempat kerja)</label>
+      <input type="text" class="text-input" id="callTimeOffice" placeholder="Contoh: 10am - 5pm">
+    </div>
+  </div>
+
+  <!-- STEP 4: Personal info -->
+  <div class="step" data-step="4">
+    <p class="step-eyebrow">Maklumat Peribadi</p>
+    <p class="step-title">Sikit info tentang cik 👤</p>
+
+    <div class="field">
+      <label class="field-label">Nama penuh (sama macam IC)</label>
+      <input type="text" class="text-input" id="fullName" placeholder="Contoh: Nur Aisyah Binti Ahmad">
+    </div>
+    <div class="field">
+      <label class="field-label">No. IC</label>
+      <input type="tel" class="text-input" id="icNumber" placeholder="000000-00-0000" maxlength="14">
+    </div>
+    <div class="field">
+      <label class="field-label">Email / Gmail</label>
+      <input type="email" class="text-input" id="email" placeholder="nama@gmail.com">
+    </div>
+    <div class="field">
+      <label class="field-label">No. Telefon</label>
+      <input type="tel" class="text-input" id="phoneNumber" placeholder="012-3456789">
+    </div>
+    <div class="field">
+      <label class="field-label">Bangsa</label>
+      <div class="pill-group" id="raceGroup">
+        <div class="pill" data-value="Melayu">Melayu</div>
+        <div class="pill" data-value="Cina">Cina</div>
+        <div class="pill" data-value="India">India</div>
+        <div class="pill" data-value="Lain-lain">Lain-lain</div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Bujang / Kahwin</label>
+      <div class="pill-group" id="statusGroup">
+        <div class="pill" data-value="Bujang">Bujang</div>
+        <div class="pill" data-value="Kahwin">Kahwin</div>
+        <div class="pill" data-value="Bercerai">Bercerai</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Address -->
+  <div class="step" data-step="5">
+    <p class="step-eyebrow">Alamat</p>
+    <p class="step-title">Di mana cik tinggal? 🏠</p>
+
+    <div class="field">
+      <label class="field-label">Alamat Tinggal & Poskod</label>
+      <textarea class="text-input" id="address" rows="3" placeholder="No, Jalan, Taman, Poskod, Bandar, Negeri" style="resize:none;"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Sewa / Keluarga</label>
+      <div class="pill-group" id="homeTypeGroup">
+        <div class="pill" data-value="Sewa">Sewa</div>
+        <div class="pill" data-value="Rumah Sendiri">Rumah Sendiri</div>
+        <div class="pill" data-value="Keluarga">Keluarga</div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Berapa Tahun Tinggal</label>
+      <div class="stepper-row">
+        <button class="stepper-btn" onclick="changeStepper('years', -1)">−</button>
+        <span class="stepper-val" id="yearsVal">3</span>
+        <button class="stepper-btn" onclick="changeStepper('years', 1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6: Reference 1 -->
+  <div class="step" data-step="6">
+    <p class="step-eyebrow">Rujukan 1</p>
+    <p class="step-title">Satu nombor untuk dihubungi 📞</p>
+    <p class="field-hint" style="margin-bottom:1.3rem;">Boleh family atau kawan rapat</p>
+
+    <div class="field">
+      <label class="field-label">Nama penuh (sama IC)</label>
+      <input type="text" class="text-input" id="ref1Name" placeholder="Nama penuh rujukan">
+    </div>
+    <div class="field">
+      <label class="field-label">Hubungan</label>
+      <div class="pill-group" id="rel1Group">
+        <div class="pill" data-value="Ibu/Bapa">Ibu/Bapa</div>
+        <div class="pill" data-value="Suami/Isteri">Suami/Isteri</div>
+        <div class="pill" data-value="Adik-beradik Kandung">Adik-beradik Kandung</div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">No. Telefon</label>
+      <input type="tel" class="text-input" id="ref1Phone" placeholder="012-3456789">
+    </div>
+    <div class="field">
+      <label class="field-label">Alamat Penuh & Poskod</label>
+      <textarea class="text-input" id="ref1Address" rows="2" placeholder="Alamat penuh" style="resize:none;"></textarea>
+    </div>
+  </div>
+
+  <!-- STEP 7: Reference 2 -->
+  <div class="step" data-step="7">
+    <p class="step-eyebrow">Rujukan 2</p>
+    <p class="step-title">Satu lagi nombor 📞</p>
+
+    <div class="field">
+      <label class="field-label">Nama penuh (sama IC)</label>
+      <input type="text" class="text-input" id="ref2Name" placeholder="Nama penuh rujukan">
+    </div>
+    <div class="field">
+      <label class="field-label">Hubungan</label>
+      <div class="pill-group" id="rel2Group">
+        <div class="pill" data-value="Ibu/Bapa">Ibu/Bapa</div>
+        <div class="pill" data-value="Suami/Isteri">Suami/Isteri</div>
+        <div class="pill" data-value="Adik-beradik Kandung">Adik-beradik Kandung</div>
+        <div class="pill" data-value="Saudara">Saudara</div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">No. Telefon</label>
+      <input type="tel" class="text-input" id="ref2Phone" placeholder="012-3456789">
+    </div>
+    <div class="field">
+      <label class="field-label">Alamat Penuh & Poskod</label>
+      <textarea class="text-input" id="ref2Address" rows="2" placeholder="Alamat penuh" style="resize:none;"></textarea>
+    </div>
+  </div>
+
+  <!-- STEP 8: Work info -->
+  <div class="step" data-step="8">
+    <p class="step-eyebrow">Maklumat Kerja</p>
+    <p class="step-title">Tempat cik kerja 💼</p>
+
+    <div class="field">
+      <label class="field-label">Jawatan Kerja</label>
+      <input type="text" class="text-input" id="jobTitle" placeholder="Contoh: Assistant Supervisor">
+    </div>
+    <div class="field">
+      <label class="field-label">Business Nature (jenis perniagaan syarikat)</label>
+      <input type="text" class="text-input" id="businessNature" placeholder="Contoh: Retail, F&B, Manufacturing">
+    </div>
+    <div class="field">
+      <label class="field-label">Nama Syarikat (sama Payslip)</label>
+      <input type="text" class="text-input" id="companyName" placeholder="Nama syarikat">
+    </div>
+    <div class="field">
+      <label class="field-label">Alamat Syarikat (tempat kerja sekarang)</label>
+      <textarea class="text-input" id="companyAddress" rows="2" placeholder="Alamat tempat kerja" style="resize:none;"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">No. Office Syarikat</label>
+      <input type="tel" class="text-input" id="companyPhone" placeholder="03-12345678 (atau no. supervisor)">
+      <p class="field-hint">Kalau tak ingat no. office, boleh letak no. supervisor</p>
+    </div>
+    <div class="field">
+      <label class="field-label">Tarikh Mula Kerja</label>
+      <input type="text" class="text-input" id="startDate" placeholder="Contoh: 03/2022">
+    </div>
+  </div>
+
+  <!-- STEP 9: Salary info -->
+  <div class="step" data-step="9">
+    <p class="step-eyebrow">Maklumat Gaji</p>
+    <p class="step-title">Berapa gaji cik? 💰</p>
+
+    <div class="field">
+      <label class="field-label">Net Monthly Salary (RM)</label>
+      <input type="number" class="text-input" id="netSalary" placeholder="1900">
+    </div>
+    <div class="field">
+      <label class="field-label">Monthly Basic Salary (RM)</label>
+      <input type="number" class="text-input" id="basicSalary" placeholder="1700">
+    </div>
+    <div class="field">
+      <label class="field-label">Tarikh Gaji Masuk</label>
+      <input type="text" class="text-input" id="salaryDate" placeholder="Contoh: 25hb setiap bulan">
+    </div>
+  </div>
+
+  <!-- STEP 10: Bank info -->
+  <div class="step" data-step="10">
+    <p class="step-eyebrow">Maklumat Bank</p>
+    <p class="step-title">Last step! 🏦</p>
+
+    <div class="field">
+      <label class="field-label">Jenis Bank</label>
+      <div class="pill-group" id="bankGroup">
+        <div class="pill" data-value="Maybank">Maybank</div>
+        <div class="pill" data-value="CIMB">CIMB</div>
+        <div class="pill" data-value="Public Bank">Public Bank</div>
+        <div class="pill" data-value="RHB">RHB</div>
+        <div class="pill" data-value="Bank Islam">Bank Islam</div>
+        <div class="pill" data-value="Lain-lain">Lain-lain</div>
+      </div>
+      <div id="otherBankWrap" style="display:none; margin-top:10px;">
+        <input type="text" class="text-input" id="otherBankName" placeholder="Sila nyatakan nama bank">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">No. Bank Acc</label>
+      <input type="tel" class="text-input" id="bankAccount" placeholder="No. akaun">
+    </div>
+  </div>
+
+  <!-- STEP 11: Review -->
+  <div class="step" data-step="11">
+    <p class="step-eyebrow">Semakan Akhir</p>
+    <p class="step-title">Semak sebelum hantar ✅</p>
+    <div id="summaryContainer"></div>
+  </div>
+
+  <!-- STEP 12: Done -->
+  <div class="step" data-step="12">
+    <div class="done-screen">
+      <div class="done-icon">🎉</div>
+      <div class="done-title">Terima kasih cik!</div>
+      <div class="done-sub">Maklumat cik dah siap.<br>Tekan butang hijau di bawah, mesej akan terus terbuka dalam WhatsApp — cik cuma perlu tekan "Hantar" 🚀</div>
+      <div id="finalSummaryBox" style="margin-top:1.5rem; text-align:left;"></div>
+      <a id="waSendBtn" class="nav-btn submit" style="margin-top:1.5rem; width:100%; display:block; text-align:center; text-decoration:none; box-sizing:border-box; padding:14px;" href="#">💬 Hantar ke Agent via WhatsApp</a>
+      <p style="font-size:11px; color:#999; margin-top:8px;">Kalau butang atas tak buka WhatsApp, cuba butang bawah:</p>
+      <a id="waSendBtnAlt" class="nav-btn next" style="margin-top:6px; width:100%; display:block; text-align:center; text-decoration:none; box-sizing:border-box; padding:14px; background:var(--bg); color:var(--mid);" href="#">📲 Buka WhatsApp (cara lain)</a>
+      <button class="nav-btn next" style="margin-top:10px; width:100%; background:var(--bg); color:var(--mid);" onclick="copyToClipboard()">📋 Atau Copy Manual</button>
+      <p id="copyConfirm" style="font-size:12px; color:#1e8449; margin-top:10px; display:none;">✅ Sudah copy! Paste dalam WhatsApp.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-btn back" id="backBtn" onclick="goBack()" style="visibility:hidden;">Kembali</button>
+  <button class="nav-btn next" id="nextBtn" onclick="goNext()">Seterusnya</button>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 11; // step 12 is the done screen, not counted in progress
+
+// ⚠️ TUKAR nombor ini kepada nombor WhatsApp AGENT (format: kod negara + nombor, tanpa + atau 0 depan)
+const AGENT_WHATSAPP_NUMBER = "601167302123";
+const AGENT_NAME = "SAIFUL";
+const AGENT_NICKNAME = "SAIFUL";
+
+const formData = {
+  model: '', storage: '', color: '', duration: '',
+  callTimeCustomer: '', callTimeOffice: '',
+  fullName: '', icNumber: '', email: '', phoneNumber: '', race: '', status: '',
+  address: '', homeType: '', years: 3,
+  ref1Name: '', rel1: '', ref1Phone: '', ref1Address: '',
+  ref2Name: '', rel2: '', ref2Phone: '', ref2Address: '',
+  jobTitle: '', businessNature: '', companyName: '', companyAddress: '', companyPhone: '', startDate: '',
+  netSalary: '', basicSalary: '', salaryDate: '',
+  bank: '', bankAccount: '', otherBankName: ''
+};
+
+function setupPillGroup(groupId, dataKey) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.pill, .tap-card').forEach(el => {
+    el.addEventListener('click', () => {
+      group.querySelectorAll('.pill, .tap-card').forEach(p => p.classList.remove('selected'));
+      el.classList.add('selected');
+      formData[dataKey] = el.getAttribute('data-value');
+    });
+  });
+}
+
+setupPillGroup('modelGroup', 'model');
+setupPillGroup('storageGroup', 'storage');
+setupPillGroup('durationGroup', 'duration');
+setupPillGroup('raceGroup', 'race');
+setupPillGroup('statusGroup', 'status');
+setupPillGroup('homeTypeGroup', 'homeType');
+setupPillGroup('rel1Group', 'rel1');
+setupPillGroup('rel2Group', 'rel2');
+
+// Special handling for bank: show free-text input when "Lain-lain" selected
+const bankGroupEl = document.getElementById('bankGroup');
+bankGroupEl.querySelectorAll('.pill').forEach(el => {
+  el.addEventListener('click', () => {
+    bankGroupEl.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    const val = el.getAttribute('data-value');
+    formData.bank = val;
+    const wrap = document.getElementById('otherBankWrap');
+    if (val === 'Lain-lain') {
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+      formData.otherBankName = '';
+      document.getElementById('otherBankName').value = '';
+    }
+  });
+});
+
+function changeStepper(key, delta) {
+  formData[key] = Math.max(0, formData[key] + delta);
+  document.getElementById(key + 'Val').textContent = formData[key];
+}
+
+function syncTextInputs() {
+  const map = {
+    callTimeCustomer: 'callTimeCustomer', callTimeOffice: 'callTimeOffice',
+    fullName: 'fullName', icNumber: 'icNumber', email: 'email', phoneNumber: 'phoneNumber',
+    address: 'address',
+    ref1Name: 'ref1Name', ref1Phone: 'ref1Phone', ref1Address: 'ref1Address',
+    ref2Name: 'ref2Name', ref2Phone: 'ref2Phone', ref2Address: 'ref2Address',
+    jobTitle: 'jobTitle', businessNature: 'businessNature', companyName: 'companyName',
+    companyAddress: 'companyAddress', companyPhone: 'companyPhone', startDate: 'startDate',
+    netSalary: 'netSalary', basicSalary: 'basicSalary', salaryDate: 'salaryDate',
+    bankAccount: 'bankAccount', otherBankName: 'otherBankName'
+  };
+  for (const [id, key] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) formData[key] = el.value;
+  }
+}
+
+function goNext() {
+  syncTextInputs();
+  if (currentStep === totalSteps) {
+    renderSummary();
+  }
+  if (currentStep < 12) {
+    document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep++;
+    document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+  }
+  if (currentStep === 12) {
+    renderFinalSummary();
+    document.getElementById('bottomNav').style.display = 'none';
+  }
+}
+
+function goBack() {
+  if (currentStep > 1) {
+    document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep--;
+    document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const pct = Math.min((currentStep / totalSteps) * 100, 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Langkah ${currentStep} / ${totalSteps}`;
+  document.getElementById('backBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+  document.getElementById('nextBtn').textContent = currentStep === totalSteps ? 'Semak →' : 'Seterusnya';
+}
+
+function renderSummary() {
+  syncTextInputs();
+  const c = document.getElementById('summaryContainer');
+  c.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-row"><span class="label">Model</span><span class="value">${formData.model} ${formData.storage} ${formData.color}</span></div>
+      <div class="summary-row"><span class="label">Tempoh</span><span class="value">${formData.duration}</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-row"><span class="label">Nama</span><span class="value">${formData.fullName}</span></div>
+      <div class="summary-row"><span class="label">IC</span><span class="value">${formData.icNumber}</span></div>
+      <div class="summary-row"><span class="label">Telefon</span><span class="value">${formData.phoneNumber}</span></div>
+      <div class="summary-row"><span class="label">Status</span><span class="value">${formData.status}</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-row"><span class="label">Alamat</span><span class="value">${formData.address}</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-row"><span class="label">Net Salary</span><span class="value">RM${formData.netSalary}</span></div>
+      <div class="summary-row"><span class="label">Syarikat</span><span class="value">${formData.companyName}</span></div>
+      <div class="summary-row"><span class="label">Bank</span><span class="value">${formData.bank} - ${formData.bankAccount}</span></div>
+    </div>
+    <p style="font-size:12px; color:#6e6e73; text-align:center; margin-top:0.5rem;">Semua nampak betul? Tekan butang bawah untuk hantar.</p>
+  `;
+  document.getElementById('nextBtn').textContent = 'Hantar ✅';
+}
+
+function buildSummaryText() {
+  const bankFinal = (formData.bank === 'Lain-lain' && formData.otherBankName)
+    ? formData.otherBankName
+    : formData.bank;
+
+  return `•⁠  ⁠🕛Pukul berapa Boleh Call Customer : ${formData.callTimeCustomer}
+•⁠  ⁠🕛Pukul berapa Boleh Call Office : ${formData.callTimeOffice}
+Nama penuh(NAMA IC) : ${formData.fullName}
+No IC : ${formData.icNumber}
+•⁠  ⁠Email / Gmail : ${formData.email}
+•⁠  ⁠No Tel : ${formData.phoneNumber}
+•⁠  ⁠Bangsa : ${formData.race}
+•⁠  ⁠Bujang / Kahwin : ${formData.status}
+•⁠  ⁠Alamat Tinggal & Poskod : ${formData.address}
+•⁠  ⁠Sewa / Keluarga : ${formData.homeType}
+•⁠  ⁠Berapa Tahun Tinggal : ${formData.years}
+Rujukan 1
+•⁠  ⁠Nama penuh(NAMA IC) : ${formData.ref1Name}
+•⁠  ⁠Hubungan : ${formData.rel1}
+•⁠  ⁠No Tel : ${formData.ref1Phone}
+•⁠  ⁠Alamat Penuh & Poskod : ${formData.ref1Address}
+Rujukan 2
+•⁠  ⁠Nama penuh(NAMA IC) : ${formData.ref2Name}
+•⁠  ⁠Hubungan : ${formData.rel2}
+•⁠  ⁠No Tel : ${formData.ref2Phone}
+•⁠  ⁠Alamat Penuh & Poskod : ${formData.ref2Address}
+•⁠  ⁠Jawatan Kerja : ${formData.jobTitle}
+•⁠  ⁠Business Nature : ${formData.businessNature}
+•⁠  ⁠Nama Syarikat(SAMA PAYSLIP) : ${formData.companyName}
+•⁠  ⁠Alamat Syarikat(Tempat kerja sekarang) : ${formData.companyAddress}
+•⁠  ⁠No.Office Syarikat : ${formData.companyPhone}
+•⁠  ⁠Tarikh mula kerja : ${formData.startDate}
+•⁠  ⁠Net Monthly Salary : RM${formData.netSalary}
+•⁠  Monthly Basic Salary : ${formData.basicSalary}
+•⁠  ⁠Tarikh Gaji masuk : ${formData.salaryDate}
+➡ Isi Model : ${formData.model}
+➡ Isi GB : ${formData.storage}
+➡ Isi Tempoh Bulanan : ${formData.duration}
+•⁠  ⁠Jenis Bank : ${bankFinal}
+•⁠  ⁠No Bank Acc : ${formData.bankAccount}
+🔆 AGENT NAME : ${AGENT_NAME}
+🔆 NICK NAME : ${AGENT_NICKNAME}`;
+}
+
+function renderFinalSummary() {
+  const summaryText = buildSummaryText();
+  document.getElementById('finalSummaryBox').innerHTML =
+    `<div class="summary-card"><pre style="white-space:pre-wrap; font-size:12px; font-family:inherit; line-height:1.6;">${summaryText}</pre></div>`;
+
+  const encodedText = encodeURIComponent(summaryText);
+  const waLink = `https://wa.me/${AGENT_WHATSAPP_NUMBER}?text=${encodedText}`;
+  const waLinkAlt = `https://api.whatsapp.com/send?phone=${AGENT_WHATSAPP_NUMBER}&text=${encodedText}`;
+
+  document.getElementById('waSendBtn').setAttribute('href', waLink);
+  document.getElementById('waSendBtnAlt').setAttribute('href', waLinkAlt);
+
+  try {
+    navigator.clipboard.writeText(summaryText);
+  } catch (e) {}
+}
+
+function copyToClipboard() {
+  const text = buildSummaryText();
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('copyConfirm').style.display = 'block';
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('copyConfirm').style.display = 'block';
+  });
+}
+
+updateProgress();
+</script>
+
+</body>
+</html>
